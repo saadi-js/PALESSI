@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- Header-->
+<header class="bg-dark py-5">
+    <div class="container px-4 px-lg-5 my-5">
+        <div class="text-center text-white">
+            <h1 class="display-4 fw-bolder fst-italic">
+                <span style="color: #FFFFFF;">PAL</span><span style="color: #C5A059;">.ESSI</span>
+            </h1>
+            <p class="lead fw-normal text-white-50 mb-0">About Us</p>
+        </div>
+    </div>
+</header>
+
+<!-- About Section-->
+<section class="py-5">
+    <div class="container px-4 px-lg-5">
+        <div class="row gx-4 gx-lg-5 justify-content-center">
+            <div class="col-lg-8">
+                <h2 class="fw-bolder mb-4">Welcome to PAL.ESSI</h2>
+                <p class="lead mb-4">Your premier destination for quality products and exceptional service.</p>
+                
+                <h3 class="fw-bolder mb-3">Our Story</h3>
+                <p class="mb-4">At PAL.ESSI, we believe in providing our customers with the finest selection of products across various categories. Our journey began with a simple mission: to make quality products accessible to everyone.</p>
+                
+                <h3 class="fw-bolder mb-3">What We Offer</h3>
+                <p class="mb-4">We carefully curate our product selection to ensure that every item meets our high standards of quality and value. From the latest technology to timeless classics, we have something for everyone.</p>
+                
+                <h3 class="fw-bolder mb-3">Why Choose Us</h3>
+                <ul class="mb-4">
+                    <li>Wide selection of quality products</li>
+                    <li>Competitive prices and special offers</li>
+                    <li>Secure and easy shopping experience</li>
+                    <li>Dedicated customer support</li>
+                    <li>Fast and reliable delivery</li>
+                </ul>
+                
+                <div class="text-center mt-5">
+                    <a href="{% url 'all_products' %}" class="btn btn-dark btn-lg">Browse Our Products</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

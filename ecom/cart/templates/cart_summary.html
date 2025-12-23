@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Header-->
+<header class="bg-dark py-5">
+    <div class="container px-4 px-lg-5 my-5">
+        <div class="text-center text-white">
+            <h1 class="display-4 fw-bolder fst-italic">
+                <span style="color: #FFFFFF;">Shopping</span> <span style="color: #C5A059;">Cart</span>
+            </h1>
+            <p class="lead fw-normal text-white-50 mb-0">Review your items</p>
+        </div>
+    </div>
+</header>
+
+<!-- Cart Section-->
+<section class="py-5">
+    <div class="container px-4 px-lg-5">
+        {% if cart %}
+        <div class="row">
+            <!-- Cart Items -->
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0">Cart Items</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for key, value in cart.items %}
+                        <div class="row mb-4 border-bottom pb-3">
+                            <div class="col-md-3">
+                                <img src="{{ value.image }}" class="img-fluid rounded" alt="{{ value.name }}">
+                            </div>
+                            <div class="col-md-6">
+                                <h5 class="fw-bold">{{ value.name }}</h5>
+                                <p class="text-muted mb-2">Price: ${{ value.price }}</p>
+                                <div class="d-flex align-items-center">
+                                    <button class="btn btn-sm btn-outline-secondary update-cart" data-product="{{ key }}" data-action="decrease">
+                                        <i class="bi bi-dash"></i>
+                                    </button>
+                                    <span class="mx-3 fw-bold" id="qty-{{ key }}">{{ value.quantity }}</span>
+                                    <button class="btn btn-sm btn-outline-secondary update-cart" data-product="{{ key }}" data-action="increase">
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-end">
+                                <h5 class="fw-bold mt-3" id="total-{{ key }}" data-price="{{ value.price }}">${{ value.price|floatformat:2 }}</h5>
+                                <button class="btn btn-sm btn-danger mt-2 remove-from-cart" data-product="{{ key }}">
+                                    <i class="bi bi-trash"></i> Remove
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="col-lg-4">
+                <div class="card sticky-top" style="top: 20px;">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0">Order Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal:</span>
+                            <span id="subtotal">$0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Tax (10%):</span>
+                            <span id="tax">$0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Shipping:</span>
+                            <span id="shipping">$5.00</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-3">
+                            <strong>Total:</strong>
+                            <strong id="grand-total">$0.00</strong>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-dark btn-lg">
+                                <i class="bi bi-credit-card me-2"></i>Proceed to Checkout
+                            </button>
+                            <a href="{% url 'all_products' %}" class="btn btn-outline-dark">
+                                <i class="bi bi-arrow-left me-2"></i>Continue Shopping
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <!-- Empty Cart -->
+        <div class="row">
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-cart-x" style="font-size: 5rem; color: #ccc;"></i>
+                <h3 class="mt-4 text-muted">Your cart is empty</h3>
+                <p class="text-muted">Add some products to get started!</p>
+                <a href="{% url 'all_products' %}" class="btn btn-dark mt-3">
+                    <i class="bi bi-bag me-2"></i>Start Shopping
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    // Calculate totals
+    function calculateTotals() {
+        let subtotal = 0;
+        
+        // Loop through each cart item
+        $('[id^="qty-"]').each(function() {
+            let productId = $(this).attr('id').replace('qty-', '');
+            let quantity = parseInt($(this).text());
+            let price = parseFloat($('#total-' + productId).data('price'));
+            let itemTotal = quantity * price;
+            
+            $('#total-' + productId).text('$' + itemTotal.toFixed(2));
+            subtotal += itemTotal;
+        });
+        
+        let tax = subtotal * 0.10;
+        let shipping = subtotal > 0 ? 5.00 : 0.00;
+        let grandTotal = subtotal + tax + shipping;
+        
+        $('#subtotal').text('$' + subtotal.toFixed(2));
+        $('#tax').text('$' + tax.toFixed(2));
+        $('#shipping').text('$' + shipping.toFixed(2));
+        $('#grand-total').text('$' + grandTotal.toFixed(2));
+    }
+    
+    // Initial calculation
+    $(document).ready(function() {
+        calculateTotals();
+    });
+    
+    // Update cart quantity
+    $(document).on('click', '.update-cart', function(e) {
+        e.preventDefault();
+        let productId = $(this).data('product');
+        let action = $(this).data('action');
+        
+        $.ajax({
+            type: 'POST',
+            url: '{% url "cart_update" %}',
+            data: {
+                'product_id': productId,
+                'action': action,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(json) {
+                let currentQty = parseInt($('#qty-' + productId).text());
+                if (action === 'increase') {
+                    $('#qty-' + productId).text(currentQty + 1);
+                } else if (action === 'decrease' && currentQty > 1) {
+                    $('#qty-' + productId).text(currentQty - 1);
+                }
+                calculateTotals();
+            },
+            error: function(xhr, errmsg, err) {
+                console.log(xhr.status + ": " + xhr.responseText);
+            }
+        });
+    });
+    
+    // Remove from cart
+    $(document).on('click', '.remove-from-cart', function(e) {
+        e.preventDefault();
+        let productId = $(this).data('product');
+        
+        if (confirm('Are you sure you want to remove this item?')) {
+            $.ajax({
+                type: 'POST',
+                url: '{% url "cart_delete" %}',
+                data: {
+                    'product_id': productId,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(json) {
+                    location.reload();
+                },
+                error: function(xhr, errmsg, err) {
+                    console.log(xhr.status + ": " + xhr.responseText);
+                }
+            });
+        }
+    });
+</script>
+
+{% endblock %}

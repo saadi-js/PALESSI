@@ -1,62 +1,191 @@
 {% extends 'base.html' %}
 {% block content %}
-         <!-- Header-->
-        <header class="bg-dark py-5">
-            <div class="container px-4 px-lg-5 my-5">
-                <div class="text-center text-white">
-                    <h1 class="display-4 fw-bolder fst-italic">
-                        <span style="color: #FFFFFF;">PAL</span><span style="color: #C5A059;">.ESSI</span>
-                    </h1>
-                    <p class="lead fw-normal text-white-50 mb-0">Shop in style</p>
+
+<!-- Hero Carousel -->
+<div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-indicators">
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
+    </div>
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <div class="bg-dark py-5" style="min-height: 400px;">
+                <div class="container px-4 px-lg-5 my-5">
+                    <div class="text-center text-white">
+                        <p class="text-uppercase mb-2" style="color: #C5A059; letter-spacing: 3px; font-size: 0.9rem;">New Collection 2026</p>
+                        <h1 class="display-3 fw-bolder mb-3">
+                            <span style="color: #FFFFFF;">PAL</span><span style="color: #C5A059;">.ESSI</span>
+                        </h1>
+                        <p class="lead fw-normal text-white-50 mb-4">Discover our exclusive collection of premium products</p>
+                        <a href="{% url 'all_products' %}" class="btn btn-outline-light btn-lg me-2">Shop Now</a>
+                        <a href="{% url 'about' %}" class="btn btn-link text-white">Learn More →</a>
+                    </div>
                 </div>
             </div>
-        </header>
-        <!-- Section-->
-        <section class="py-5">
-            <div class="container px-4 px-lg-5 mt-5">
-                <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
-                    
-                       {% for prod in products %}
-                       <div class="col mb-5">
-                        <div class="card h-100">
-                            <!-- Sale badge-->
-                            {% if prod.is_sale %}
-                            <div class="badge bg-dark text-white position-absolute" style="top: 0.5rem; right: 0.5rem">Sale</div>
-                            {% endif %}
-                            <!-- Product image-->
-                            <img class="card-img-top" src="{{ prod.image.url }}" alt="..." />
-                            <!-- Product details-->
-                            <div class="card-body p-4">
-                                <div class="text-center">
-                                    <!-- Product name-->
-                                    <h5 class="fw-bolder">{{ prod.name }}</h5>
-                                      <!-- Product reviews-->
-                                    <div class="d-flex justify-content-center small text-warning mb-2">
-                                        <div class="bi-star-fill"></div>
-                                        <div class="bi-star-fill"></div>
-                                        <div class="bi-star-fill"></div>
-                                        <div class="bi-star-fill"></div>
-                                        <div class="bi-star-fill"></div>
         </div>
-                                    <!-- Product price-->
-                                    {% if prod.is_sale %}
-                                        <span class="text-muted text-decoration-line-through">${{ prod.price }}</span>
-                                        ${{ prod.sale_price }}
-                                    {% else %}
-                                        ${{ prod.price }}
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <!-- Product actions-->
-                            <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                                <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="{% url 'product' prod.id %}">View Details</a></div>
-                            </div>
+        <div class="carousel-item">
+            <div style="background: linear-gradient(135deg, #C5A059 0%, #A88A45 100%); min-height: 400px;" class="py-5">
+                <div class="container px-4 px-lg-5 my-5">
+                    <div class="text-center text-white">
+                        <p class="text-uppercase mb-2" style="letter-spacing: 3px; font-size: 0.9rem;">Limited Time Offer</p>
+                        <h1 class="display-3 fw-bolder mb-3">Up to 50% Off</h1>
+                        <p class="lead fw-normal mb-4" style="opacity: 0.9;">Don't miss out on our biggest sale of the season</p>
+                        <a href="{% url 'all_products' %}" class="btn btn-dark btn-lg">View Deals</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <div class="bg-dark py-5" style="min-height: 400px;">
+                <div class="container px-4 px-lg-5 my-5">
+                    <div class="text-center text-white">
+                        <p class="text-uppercase mb-2" style="color: #C5A059; letter-spacing: 3px; font-size: 0.9rem;">Free Delivery</p>
+                        <h1 class="display-3 fw-bolder mb-3">Free Shipping Over $50</h1>
+                        <p class="lead fw-normal text-white-50 mb-4">Fast, reliable delivery right to your doorstep</p>
+                        <a href="{% url 'all_products' %}" class="btn btn-outline-light btn-lg">Start Shopping</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+    </button>
+</div>
+
+<!-- Trust Badges -->
+<section class="py-4 bg-light border-bottom">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-6 col-md-3 mb-3 mb-md-0">
+                <i class="bi bi-truck fs-3 mb-2" style="color: #C5A059;"></i>
+                <h6 class="fw-bold mb-1">Free Shipping</h6>
+                <small class="text-muted">On orders over $50</small>
+            </div>
+            <div class="col-6 col-md-3 mb-3 mb-md-0">
+                <i class="bi bi-arrow-repeat fs-3 mb-2" style="color: #C5A059;"></i>
+                <h6 class="fw-bold mb-1">Easy Returns</h6>
+                <small class="text-muted">30-day return policy</small>
+            </div>
+            <div class="col-6 col-md-3">
+                <i class="bi bi-shield-check fs-3 mb-2" style="color: #C5A059;"></i>
+                <h6 class="fw-bold mb-1">Secure Payment</h6>
+                <small class="text-muted">100% secure checkout</small>
+            </div>
+            <div class="col-6 col-md-3">
+                <i class="bi bi-headset fs-3 mb-2" style="color: #C5A059;"></i>
+                <h6 class="fw-bold mb-1">24/7 Support</h6>
+                <small class="text-muted">Dedicated support</small>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Shop by Category -->
+<section class="py-5">
+    <div class="container px-4 px-lg-5">
+        <div class="text-center mb-5">
+            <h2 class="fw-bolder">Shop by Category</h2>
+            <p class="text-muted">Explore our wide range of categories</p>
+        </div>
+        <div class="row gx-4 gx-lg-5">
+            {% for cat in categories %}
+            <div class="col-6 col-lg-3 mb-4">
+                <a href="{% url 'category' cat.name %}" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm h-100 category-card">
+                        <div class="card-body text-center py-4">
+                            <i class="bi bi-grid fs-1 mb-3" style="color: #C5A059;"></i>
+                            <h5 class="fw-bold text-dark">{{ cat.name }}</h5>
+                            <small class="text-muted">Explore Collection</small>
+                            <div class="mt-2" style="color: #C5A059;">Shop Now →</div>
                         </div>
                     </div>
-                    {% endfor %}
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
 
-                    
+<!-- Featured Products Section -->
+<section class="py-5 bg-light">
+    <div class="container px-4 px-lg-5">
+        <div class="text-center mb-5">
+            <h2 class="fw-bolder">Featured Products</h2>
+            <p class="text-muted">Handpicked selections just for you</p>
+        </div>
+        <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
+            {% for prod in products %}
+            <div class="col mb-5">
+                <div class="card h-100 product-card">
+                    <!-- Sale badge-->
+                    {% if prod.is_sale %}
+                    <div class="badge bg-danger text-white position-absolute" style="top: 0.5rem; right: 0.5rem">Sale</div>
+                    {% endif %}
+                    <!-- Wishlist button -->
+                    <button class="btn btn-sm btn-light position-absolute wishlist-btn" style="top: 0.5rem; left: 0.5rem; border-radius: 50%; width: 35px; height: 35px; padding: 0;">
+                        <i class="bi bi-heart"></i>
+                    </button>
+                    <!-- Product image-->
+                    <a href="{% url 'product' prod.id %}">
+                        <img class="card-img-top" src="{{ prod.image.url }}" alt="{{ prod.name }}" />
+                    </a>
+                    <!-- Product details-->
+                    <div class="card-body p-4">
+                        <div class="text-center">
+                            <small class="text-muted">{{ prod.category.name }}</small>
+                            <h5 class="fw-bolder mt-1">{{ prod.name }}</h5>
+                            <div class="d-flex justify-content-center small text-warning mb-2">
+                                <div class="bi-star-fill"></div>
+                                <div class="bi-star-fill"></div>
+                                <div class="bi-star-fill"></div>
+                                <div class="bi-star-fill"></div>
+                                <div class="bi-star-fill"></div>
+                            </div>
+                            {% if prod.is_sale %}
+                                <span class="text-muted text-decoration-line-through">${{ prod.price }}</span>
+                                <span class="fw-bold" style="color: #C5A059;">${{ prod.sale_price }}</span>
+                            {% else %}
+                                <span class="fw-bold">${{ prod.price }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <!-- Product actions-->
+                    <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+                        <div class="text-center">
+                            <a class="btn btn-outline-dark mt-auto" href="{% url 'product' prod.id %}">View Details</a>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </section>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-4">
+            <a href="{% url 'all_products' %}" class="btn btn-dark btn-lg">View All Products →</a>
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter Section -->
+<section class="py-5 bg-dark">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8 text-center text-lg-start mb-4 mb-lg-0">
+                <h3 class="text-white fw-bold mb-2">Subscribe & Get 20% Off Your First Order</h3>
+                <p class="text-white-50 mb-0">Join our newsletter for exclusive deals and new arrivals.</p>
+            </div>
+            <div class="col-lg-4">
+                <form class="d-flex gap-2">
+                    <input type="email" class="form-control" placeholder="Enter your email">
+                    <button type="submit" class="btn text-white" style="background: #C5A059; white-space: nowrap;">Subscribe</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
 {% endblock %}

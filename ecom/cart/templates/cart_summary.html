@@ -5,7 +5,7 @@
 <header class="bg-dark py-5">
     <div class="container px-4 px-lg-5 my-5">
         <div class="text-center text-white">
-            <h1 class="display-4 fw-bolder fst-italic">
+            <h1 class="display-4 fw-bolder" style="font-family: 'Playfair Display', serif;">
                 <span style="color: #FFFFFF;">Shopping</span> <span style="color: #C5A059;">Cart</span>
             </h1>
             <p class="lead fw-normal text-white-50 mb-0">Review your items</p>
@@ -20,72 +20,96 @@
         <div class="row">
             <!-- Cart Items -->
             <div class="col-lg-8">
-                <div class="card mb-4">
-                    <div class="card-header bg-dark text-white">
-                        <h5 class="mb-0">Cart Items</h5>
+                <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+                    <div class="card-header py-3" style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);">
+                        <h5 class="mb-0 text-white"><i class="bi bi-bag me-2"></i>Cart Items ({{ cart|length }})</h5>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body p-4">
                         {% for key, value in cart.items %}
-                        <div class="row mb-4 border-bottom pb-3">
-                            <div class="col-md-3">
-                                <img src="{{ value.image }}" class="img-fluid rounded" alt="{{ value.name }}">
+                        <div class="row align-items-center mb-4 pb-4 {% if not forloop.last %}border-bottom{% endif %}">
+                            <div class="col-md-2 col-3">
+                                <img src="{{ value.image }}" class="img-fluid rounded-3" alt="{{ value.name }}" style="max-height: 100px; object-fit: cover;">
                             </div>
-                            <div class="col-md-6">
-                                <h5 class="fw-bold">{{ value.name }}</h5>
-                                <p class="text-muted mb-2">Price: ${{ value.price }}</p>
-                                <div class="d-flex align-items-center">
-                                    <button class="btn btn-sm btn-outline-secondary update-cart" data-product="{{ key }}" data-action="decrease">
+                            <div class="col-md-4 col-9">
+                                <h6 class="fw-bold mb-1">{{ value.name }}</h6>
+                                <p class="text-muted small mb-0">Unit Price: <span style="color: #C5A059;">${{ value.price }}</span></p>
+                            </div>
+                            <div class="col-md-3 col-6 mt-3 mt-md-0">
+                                <div class="d-flex align-items-center justify-content-center border rounded-pill" style="max-width: 120px;">
+                                    <button class="btn btn-link text-dark p-2 update-cart" data-product="{{ key }}" data-action="decrease">
                                         <i class="bi bi-dash"></i>
                                     </button>
-                                    <span class="mx-3 fw-bold" id="qty-{{ key }}">{{ value.quantity }}</span>
-                                    <button class="btn btn-sm btn-outline-secondary update-cart" data-product="{{ key }}" data-action="increase">
+                                    <span class="fw-bold" id="qty-{{ key }}" style="min-width: 30px; text-align: center;">{{ value.quantity }}</span>
+                                    <button class="btn btn-link text-dark p-2 update-cart" data-product="{{ key }}" data-action="increase">
                                         <i class="bi bi-plus"></i>
                                     </button>
                                 </div>
                             </div>
-                            <div class="col-md-3 text-end">
-                                <h5 class="fw-bold mt-3" id="total-{{ key }}" data-price="{{ value.price }}">${{ value.price|floatformat:2 }}</h5>
-                                <button class="btn btn-sm btn-danger mt-2 remove-from-cart" data-product="{{ key }}">
-                                    <i class="bi bi-trash"></i> Remove
+                            <div class="col-md-2 col-4 mt-3 mt-md-0 text-end">
+                                <h6 class="fw-bold" id="total-{{ key }}" data-price="{{ value.price }}" style="color: #C5A059;">${{ value.price|floatformat:2 }}</h6>
+                            </div>
+                            <div class="col-md-1 col-2 mt-3 mt-md-0 text-end">
+                                <button class="btn btn-link text-danger p-0 remove-from-cart" data-product="{{ key }}" title="Remove">
+                                    <i class="bi bi-trash fs-5"></i>
                                 </button>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
                 </div>
+                
+                <a href="{% url 'all_products' %}" class="btn btn-palessi-outline">
+                    <i class="bi bi-arrow-left me-2"></i>Continue Shopping
+                </a>
             </div>
 
             <!-- Order Summary -->
             <div class="col-lg-4">
-                <div class="card sticky-top" style="top: 20px;">
-                    <div class="card-header bg-dark text-white">
-                        <h5 class="mb-0">Order Summary</h5>
+                <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 100px;">
+                    <div class="card-header py-3" style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);">
+                        <h5 class="mb-0 text-white"><i class="bi bi-receipt me-2"></i>Order Summary</h5>
                     </div>
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Subtotal:</span>
-                            <span id="subtotal">$0.00</span>
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted">Subtotal:</span>
+                            <span class="fw-semibold" id="subtotal">$0.00</span>
                         </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Tax (10%):</span>
-                            <span id="tax">$0.00</span>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted">Tax (10%):</span>
+                            <span class="fw-semibold" id="tax">$0.00</span>
                         </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Shipping:</span>
-                            <span id="shipping">$5.00</span>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted">Shipping:</span>
+                            <span class="fw-semibold" id="shipping">$5.00</span>
                         </div>
                         <hr>
-                        <div class="d-flex justify-content-between mb-3">
-                            <strong>Total:</strong>
-                            <strong id="grand-total">$0.00</strong>
+                        <div class="d-flex justify-content-between mb-4">
+                            <span class="fw-bold fs-5">Total:</span>
+                            <span class="fw-bold fs-5" id="grand-total" style="color: #C5A059;">$0.00</span>
                         </div>
+                        
+                        <!-- Promo Code -->
+                        <div class="mb-4">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Promo code" style="border-radius: 10px 0 0 10px;">
+                                <button class="btn btn-outline-dark" type="button" style="border-radius: 0 10px 10px 0;">Apply</button>
+                            </div>
+                        </div>
+                        
                         <div class="d-grid gap-2">
-                            <button class="btn btn-dark btn-lg">
+                            <button class="btn btn-palessi btn-lg">
                                 <i class="bi bi-credit-card me-2"></i>Proceed to Checkout
                             </button>
-                            <a href="{% url 'all_products' %}" class="btn btn-outline-dark">
-                                <i class="bi bi-arrow-left me-2"></i>Continue Shopping
-                            </a>
+                        </div>
+                        
+                        <!-- Trust Badges -->
+                        <div class="text-center mt-4 pt-4 border-top">
+                            <div class="d-flex justify-content-center gap-3 text-muted">
+                                <i class="bi bi-shield-check fs-4" title="Secure Payment"></i>
+                                <i class="bi bi-credit-card fs-4" title="Multiple Payment Options"></i>
+                                <i class="bi bi-truck fs-4" title="Fast Delivery"></i>
+                            </div>
+                            <small class="text-muted d-block mt-2">Secure checkout guaranteed</small>
                         </div>
                     </div>
                 </div>
@@ -95,19 +119,20 @@
         <!-- Empty Cart -->
         <div class="row">
             <div class="col-12 text-center py-5">
-                <i class="bi bi-cart-x" style="font-size: 5rem; color: #ccc;"></i>
-                <h3 class="mt-4 text-muted">Your cart is empty</h3>
-                <p class="text-muted">Add some products to get started!</p>
-                <a href="{% url 'all_products' %}" class="btn btn-dark mt-3">
-                    <i class="bi bi-bag me-2"></i>Start Shopping
-                </a>
+                <div class="py-5">
+                    <i class="bi bi-cart-x" style="font-size: 6rem; color: #ddd;"></i>
+                    <h3 class="mt-4" style="font-family: 'Playfair Display', serif;">Your cart is empty</h3>
+                    <p class="text-muted mb-4">Looks like you haven't added anything to your cart yet.</p>
+                    <a href="{% url 'all_products' %}" class="btn btn-palessi btn-lg">
+                        <i class="bi bi-bag me-2"></i>Start Shopping
+                    </a>
+                </div>
             </div>
         </div>
         {% endif %}
     </div>
 </section>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     // Calculate totals
     function calculateTotals() {
@@ -172,23 +197,32 @@
     $(document).on('click', '.remove-from-cart', function(e) {
         e.preventDefault();
         let productId = $(this).data('product');
+        let $row = $(this).closest('.row');
         
-        if (confirm('Are you sure you want to remove this item?')) {
-            $.ajax({
-                type: 'POST',
-                url: '{% url "cart_delete" %}',
-                data: {
-                    'product_id': productId,
-                    'csrfmiddlewaretoken': '{{ csrf_token }}'
-                },
-                success: function(json) {
-                    location.reload();
-                },
-                error: function(xhr, errmsg, err) {
-                    console.log(xhr.status + ": " + xhr.responseText);
-                }
-            });
-        }
+        $row.css('opacity', '0.5');
+        
+        $.ajax({
+            type: 'POST',
+            url: '{% url "cart_delete" %}',
+            data: {
+                'product_id': productId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(json) {
+                $row.slideUp(300, function() {
+                    $(this).remove();
+                    calculateTotals();
+                    // Check if cart is empty
+                    if ($('[id^="qty-"]').length === 0) {
+                        location.reload();
+                    }
+                });
+            },
+            error: function(xhr, errmsg, err) {
+                $row.css('opacity', '1');
+                console.log(xhr.status + ": " + xhr.responseText);
+            }
+        });
     });
 </script>
 

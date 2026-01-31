@@ -4,10 +4,13 @@
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-6 col-lg-5">
-            <div class="card shadow-lg border-0 rounded-lg mt-5">
-                <div class="card-header bg-dark text-white text-center py-4">
-                    <h3 class="fw-bold mb-0">Welcome Back</h3>
-                    <p class="mb-0 small">Sign in to your account</p>
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden mt-5">
+                <div class="text-center py-5" style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);">
+                    <h2 class="fw-bold mb-2" style="font-family: 'Playfair Display', serif;">
+                        <span style="color: #FFFFFF;">PAL</span><span style="color: #C5A059;">.ESSI</span>
+                    </h2>
+                    <h4 class="text-white fw-bold mb-1">Welcome Back</h4>
+                    <p class="text-white-50 mb-0 small">Sign in to your account</p>
                 </div>
                 <div class="card-body p-5">
                     <form method="POST" action="{% url 'login' %}">
@@ -15,21 +18,21 @@
                         
                         <div class="mb-4">
                             <label for="username" class="form-label fw-semibold">Username or Email</label>
-                            <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username or email" required>
+                            <input type="text" class="form-control form-control-lg" id="username" name="username" placeholder="Enter your username or email" style="border-radius: 10px;" required>
                         </div>
                         
                         <div class="mb-4">
                             <label for="password" class="form-label fw-semibold">Password</label>
                             <div class="input-group">
-                                <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
-                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <input type="password" class="form-control form-control-lg" id="password" name="password" placeholder="Enter your password" style="border-radius: 10px 0 0 10px;" required>
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword" style="border-radius: 0 10px 10px 0;">
                                     <i class="bi bi-eye" id="eyeIcon"></i>
                                 </button>
                             </div>
                         </div>
                         
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-dark">Login</button>
+                            <button type="submit" class="btn btn-palessi btn-lg">Sign In</button>
                         </div>
                     </form>
                     
@@ -37,8 +40,8 @@
                         <a href="#" class="text-muted text-decoration-none small">Forgot password?</a>
                     </div>
                 </div>
-                <div class="card-footer text-center py-3 bg-light">
-                    <small class="text-muted">Don't have an account? <a href="{% url 'register' %}" class="text-dark fw-semibold text-decoration-none">Sign up</a></small>
+                <div class="card-footer text-center py-3 bg-light border-0">
+                    <small class="text-muted">Don't have an account? <a href="{% url 'register' %}" style="color: #C5A059;" class="fw-semibold text-decoration-none">Sign up</a></small>
                 </div>
             </div>
         </div>

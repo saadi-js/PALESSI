@@ -38,6 +38,12 @@ class Cart():
             del self.cart[product_id]
             self.session.modified = True
     
+    def clear(self):
+        """Clear all items from cart"""
+        self.session['session_key'] = {}
+        self.cart = {}
+        self.session.modified = True
+    
     def __len__(self):
         return len(self.cart)
     

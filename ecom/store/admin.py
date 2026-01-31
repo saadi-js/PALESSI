@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Customer, product, Order
+from .models import Category, Customer, product, Order, ShippingAddress, CheckoutOrder, OrderItem
 from django.utils.html import format_html
 
 # Category Admin
@@ -49,7 +49,7 @@ class ProductAdmin(admin.ModelAdmin):
         return '-'
     image_preview.short_description = 'Image'
 
-# Order Admin
+# Order Admin (Legacy)
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = ('id', 'product', 'customer', 'quantity', 'price', 'date', 'status')
@@ -59,6 +59,59 @@ class OrderAdmin(admin.ModelAdmin):
     ordering = ('-date',)
     date_hierarchy = 'date'
     list_per_page = 25
+
+
+# Order Item Inline
+class OrderItemInline(admin.TabularInline):
+    model = OrderItem
+    extra = 0
+    readonly_fields = ('product', 'product_name', 'quantity', 'price', 'get_total')
+    
+    def get_total(self, obj):
+        return f"${obj.get_total():.2f}"
+    get_total.short_description = 'Total'
+
+
+# Checkout Order Admin
+@admin.register(CheckoutOrder)
+class CheckoutOrderAdmin(admin.ModelAdmin):
+    list_display = ('order_number', 'full_name', 'email', 'total', 'status', 'payment_method', 'created_at')
+    list_filter = ('status', 'payment_method', 'created_at')
+    search_fields = ('order_number', 'full_name', 'email', 'phone')
+    list_editable = ('status',)
+    ordering = ('-created_at',)
+    date_hierarchy = 'created_at'
+    list_per_page = 25
+    readonly_fields = ('order_number', 'created_at', 'updated_at')
+    inlines = [OrderItemInline]
+    
+    fieldsets = (
+        ('Order Info', {
+            'fields': ('order_number', 'status', 'payment_method', 'created_at', 'updated_at')
+        }),
+        ('Customer Info', {
+            'fields': ('user', 'full_name', 'email', 'phone')
+        }),
+        ('Shipping Address', {
+            'fields': ('address_line1', 'address_line2', 'city', 'state', 'postal_code', 'country')
+        }),
+        ('Order Totals', {
+            'fields': ('subtotal', 'tax', 'shipping_cost', 'total')
+        }),
+        ('Notes', {
+            'fields': ('notes',),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+# Shipping Address Admin
+@admin.register(ShippingAddress)
+class ShippingAddressAdmin(admin.ModelAdmin):
+    list_display = ('full_name', 'email', 'city', 'state', 'country')
+    search_fields = ('full_name', 'email', 'city')
+    list_filter = ('country', 'state')
+
 
 # Customize Admin Site
 admin.site.site_header = 'PALESSI Administration'

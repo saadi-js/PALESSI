@@ -1,6 +1,6 @@
-# E-Commerce Platform - Django Web Application
+# PALESSI - E-Commerce Platform
 
-A full-featured e-commerce web application built with Django 6.0, featuring product browsing, user authentication, shopping cart functionality, and order management.
+A full-featured e-commerce web application built with Django 6.0, featuring product browsing, user authentication, shopping cart, checkout system, and order management.
 
 ## 📋 Table of Contents
 
@@ -22,7 +22,7 @@ A full-featured e-commerce web application built with Django 6.0, featuring prod
 
 ## 🎯 Overview
 
-This is a modern e-commerce platform developed using Django 6.0 that provides a complete online shopping experience. The application allows users to browse products by categories, add items to their cart, manage quantities, and complete purchases. It includes a robust authentication system and an admin panel for managing products, categories, customers, and orders.
+This is a modern e-commerce platform developed using Django 6.0 that provides a complete online shopping experience. The application allows users to browse products by categories, add items to their cart, proceed through checkout, and receive order confirmations. It includes a robust authentication system and an admin panel for managing products, categories, customers, and orders.
 
 ## ✨ Features
 
@@ -50,6 +50,14 @@ This is a modern e-commerce platform developed using Django 6.0 that provides a 
   - Real-time cart total calculation
   - Cart accessible across all pages via context processor
 
+- **Checkout & Orders**
+  - Complete checkout flow with shipping form
+  - Multiple payment method options (Cash on Delivery)
+  - Order summary with tax and shipping calculation
+  - Auto-generated unique order numbers (PAL-XXXXXXXX)
+  - Order confirmation page with order details
+  - Order status tracking (Pending → Processing → Shipped → Delivered)
+
 - **Product Management**
   - Product images with media upload
   - Product descriptions
@@ -61,8 +69,10 @@ This is a modern e-commerce platform developed using Django 6.0 that provides a 
 - Django admin panel for complete site management
 - Manage categories, products, customers, and orders
 - Product image uploads
-- Order status tracking
+- Order status tracking with inline order items
+- Checkout order management with full details
 - Customer management
+- Enhanced admin with filters, search, and image previews
 
 ## 🛠 Technology Stack
 
@@ -120,7 +130,9 @@ ecom/
 ├── cart/                      # Shopping cart app
 │   ├── migrations/           # Database migrations
 │   ├── templates/            # Cart templates
-│   │   └── cart_summary.html # Cart page
+│   │   ├── cart_summary.html # Cart page
+│   │   ├── checkout.html     # Checkout page
+│   │   └── order_confirmation.html # Order confirmation
 │   ├── cart.py               # Cart class logic
 │   ├── views.py              # Cart views
 │   ├── urls.py               # Cart URL patterns
@@ -370,7 +382,7 @@ class product(models.Model):
 - Images stored in `media/uploads/products/`
 - Linked to categories via foreign key
 
-### Order Model
+### Order Model (Legacy)
 ```python
 class Order(models.Model):
     product = models.ForeignKey(product, on_delete=models.CASCADE)
@@ -382,10 +394,77 @@ class Order(models.Model):
     date = models.DateField(default=datetime.datetime.today)
     status = models.BooleanField(default=False)
 ```
-- Tracks customer orders
+- Legacy order model
 - Links products to customers
 - Stores delivery information
-- Status tracking (pending/completed)
+
+### CheckoutOrder Model
+```python
+class CheckoutOrder(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('processing', 'Processing'),
+        ('shipped', 'Shipped'),
+        ('delivered', 'Delivered'),
+        ('cancelled', 'Cancelled'),
+    ]
+    
+    order_number = models.CharField(max_length=20, unique=True)  # Auto-generated: PAL-XXXXXXXX
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    full_name = models.CharField(max_length=100)
+    email = models.EmailField()
+    phone = models.CharField(max_length=20)
+    address_line1 = models.CharField(max_length=200)
+    address_line2 = models.CharField(max_length=200, blank=True)
+    city = models.CharField(max_length=100)
+    state = models.CharField(max_length=100)
+    postal_code = models.CharField(max_length=20)
+    country = models.CharField(max_length=100, default='United States')
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2)
+    tax = models.DecimalField(max_digits=10, decimal_places=2)
+    shipping_cost = models.DecimalField(max_digits=10, decimal_places=2, default=5.00)
+    total = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    payment_method = models.CharField(max_length=50, default='Cash on Delivery')
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+```
+- Main checkout order model
+- Auto-generates unique order numbers
+- Stores complete shipping address
+- Tracks order status through fulfillment
+- Calculates and stores order totals
+
+### OrderItem Model
+```python
+class OrderItem(models.Model):
+    order = models.ForeignKey(CheckoutOrder, related_name='items', on_delete=models.CASCADE)
+    product = models.ForeignKey(product, on_delete=models.SET_NULL, null=True)
+    product_name = models.CharField(max_length=100)
+    product_image = models.CharField(max_length=500, blank=True)
+    quantity = models.IntegerField(default=1)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+```
+- Individual items in each order
+- Stores product snapshot (name, image, price at time of purchase)
+- Linked to CheckoutOrder via foreign key
+
+### ShippingAddress Model
+```python
+class ShippingAddress(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    full_name = models.CharField(max_length=100)
+    email = models.EmailField()
+    phone = models.CharField(max_length=20)
+    address_line1 = models.CharField(max_length=200)
+    address_line2 = models.CharField(max_length=200, blank=True)
+    city = models.CharField(max_length=100)
+    state = models.CharField(max_length=100)
+    postal_code = models.CharField(max_length=20)
+    country = models.CharField(max_length=100, default='United States')
+```
+- Stores saved shipping addresses for users
 
 ## 🌐 URL Routes
 
@@ -411,10 +490,12 @@ class Order(models.Model):
 
 ### Cart URLs (`cart/urls.py`)
 ```
-/cart/              - Cart summary page
-/cart/add/          - Add item to cart (AJAX)
-/cart/update/       - Update cart quantities (AJAX)
-/cart/delete/       - Remove item from cart (AJAX)
+/cart/                                    - Cart summary page
+/cart/add/                                - Add item to cart (AJAX)
+/cart/update/                             - Update cart quantities (AJAX)
+/cart/delete/                             - Remove item from cart (AJAX)
+/cart/checkout/                           - Checkout page with shipping form
+/cart/order-confirmation/<order_number>/  - Order confirmation page
 ```
 
 ## 🎨 Templates
@@ -434,6 +515,8 @@ class Order(models.Model):
 
 ### Cart Templates
 - **cart_summary.html** - Shopping cart with item management
+- **checkout.html** - Checkout page with shipping form and order summary
+- **order_confirmation.html** - Order success page with details
 
 ### Template Features
 - Bootstrap 5.2.3 responsive design
@@ -459,7 +542,52 @@ class Order(models.Model):
 - Product images stored in `media/uploads/products/`
 - Admin static files in `staticfiles/admin/`
 
-## 🔐 Admin Panel
+## � Checkout Flow
+
+### Process Overview
+```
+Cart → Checkout → Order Confirmation
+  ↓         ↓              ↓
+Review   Fill Form    View Order
+Items    & Submit     Details
+```
+
+### Checkout Page Features
+1. **Shipping Information Form**
+   - Full name, email, phone
+   - Complete address (line 1, line 2, city, state, postal code, country)
+   - Auto-fills for logged-in users
+
+2. **Payment Methods**
+   - Cash on Delivery (enabled)
+   - Credit/Debit Card (coming soon)
+   - PayPal (coming soon)
+
+3. **Order Summary**
+   - List of all cart items with images
+   - Subtotal, Tax (10%), Shipping ($5.00)
+   - Grand total calculation
+
+4. **Order Notes**
+   - Optional special instructions
+
+### Order Confirmation
+- Unique order number (PAL-XXXXXXXX format)
+- Complete shipping address display
+- Payment method and status
+- List of ordered items
+- Order totals breakdown
+- "What Happens Next" guide
+- Continue shopping option
+
+### Order Status Flow
+```
+Pending → Processing → Shipped → Delivered
+                              ↓
+                          Cancelled
+```
+
+## �🔐 Admin Panel
 
 ### Access
 - URL: `/admin/`
@@ -467,17 +595,24 @@ class Order(models.Model):
 - Create superuser: `python manage.py createsuperuser`
 
 ### Registered Models
-1. **Categories** - Manage product categories
-2. **Products** - Add/edit/delete products
+1. **Categories** - Manage product categories with product count
+2. **Products** - Add/edit/delete products with image previews
 3. **Customers** - View customer information
-4. **Orders** - Manage customer orders
+4. **Orders (Legacy)** - Legacy order management
+5. **Checkout Orders** - Full checkout order management with status tracking
+6. **Order Items** - Individual items in orders (inline in Checkout Orders)
+7. **Shipping Addresses** - Saved customer addresses
 
 ### Admin Features
 - Full CRUD operations for all models
-- Image upload for products
+- Image upload and preview for products
 - Search and filter functionality
+- Inline editing for prices and sale status
+- Order status management with color-coded badges
+- Inline order items view in checkout orders
+- Date hierarchy for order filtering
 - Bulk actions
-- Rich text editing for descriptions
+- Custom admin branding (PALESSI Administration)
 
 ## 🔒 Security Notes
 
@@ -546,6 +681,8 @@ class Cart():
 - **Remove Items** - Delete individual products
 - **Cart Count** - Display total items in navigation
 - **Price Calculation** - Real-time total updates
+- **Sale Price Support** - Automatically uses sale price when available
+- **Cart Clear** - Clear all items after checkout
 
 ### Context Processor
 Cart is available globally in templates via context processor:
@@ -585,21 +722,28 @@ def cart(request):
 ## 🚀 Future Enhancements
 
 ### Planned Features
-- [ ] Checkout and payment integration (Stripe, PayPal)
+- [ ] Payment integration (Stripe, PayPal)
 - [ ] Order confirmation emails
 - [ ] Product reviews and ratings
 - [ ] Wishlist functionality
 - [ ] Advanced search with filters
 - [ ] Product inventory management
 - [ ] Multi-image support for products
-- [ ] User profile pages
-- [ ] Order history for users
+- [ ] User profile pages with order history
 - [ ] Coupon/discount codes
 - [ ] Product recommendations
 - [ ] Social media sharing
 - [ ] Newsletter subscription
 - [ ] Live chat support
 - [ ] Mobile app (React Native/Flutter)
+
+### Completed Features ✅
+- [x] Complete checkout flow
+- [x] Order confirmation page
+- [x] Unique order number generation
+- [x] Order status tracking
+- [x] Enhanced admin panel
+- [x] Sale price handling in cart
 
 ### Technical Improvements
 - [ ] RESTful API (Django REST Framework)
